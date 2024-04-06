@@ -1,1 +1,3 @@
-# odin-battleship
+# Odin Battleship Project
+
+Final Project
