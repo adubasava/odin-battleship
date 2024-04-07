@@ -1,5 +1,6 @@
 ﻿import Ship from './ship';
 import Gameboard from './gameboard';
+import Player from './player';
 
 describe('Ship', () => {
     const testShip = new Ship(4);
@@ -33,4 +34,19 @@ describe('Gameboard', () => {
     test('receive attack false', () => expect(testGameboard.receiveAttack(5)).toBe(false));
     
     test('areAllShipsSunk false', () => expect(testGameboard.areAllShipsSunk()).toBe(false));
+});
+
+describe('Player', () => {
+    const player = new Player('user');
+    const computer = new Player('computer');
+  
+    test('player turn', () => expect(player.turn).toBe(false));
+
+    test('change player turn', () => {
+        player.takeTurn()
+    });
+  
+    test('player turn', () => expect(player.turn).toBe(true));
+
+    test('computer turn', () => expect(computer.playAuto()).toBeLessThan(100));
 });
