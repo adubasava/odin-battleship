@@ -6,7 +6,9 @@
     }
 
     hit() {
-        return this.hits += 1;
+        if (this.hits < this.length) {
+            return this.hits += 1;
+        }        
     }
 
     isSunk() {

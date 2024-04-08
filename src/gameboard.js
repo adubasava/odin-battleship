@@ -34,16 +34,18 @@ export default class Gameboard {
 
     receiveAttack(cell) {
         if (this.board[cell] === 0) {
-            this.board[cell] === 'missed';
-            return false;
+            this.board[cell] = 'missed';
+            //return false;
         } else {
             for (let ship of this.ships) {
-                if (ship.length === this.board[cell]) {
+                if (ship.length === this.board[cell] && ship.hits < ship.length) {
+                    this.board[cell] = 'hit';
                     ship.hit();
                 }
             }
-            return true;
+            //return true;
         }
+        return this.board[cell];
     }
 
     areAllShipsSunk() {

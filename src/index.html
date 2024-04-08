@@ -4,7 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Battleship</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee+Spice&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
 </head>
 <body>
+    <div class="header">
+        <div class="game-title">Battleship</div>
+    </div>
+    <div class="info">
+        <div class="instructions">Info</div>
+    </div>
+    <div class="boards">
+        <div class="player">
+            <div class="ships"></div>
+            <div class="board">
+                <div class="title">Your board</div>
+                <div class="gameboard" id="gameboard1"></div>
+            </div>            
+        </div>
+        <div class="computer">
+            <div class="board">
+                <div class="title">AI board</div>
+                <div class="gameboard" id="gameboard2"></div>
+            </div>
+            <div class="ships"></div>
+        </div>
+    </div>
+    <div class="buttons">
+        <button id="play">Play</button>
+        <button id="randomize">Randomize</button>
+    </div>
 </body>
 </html>
