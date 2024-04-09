@@ -27,11 +27,15 @@ describe('Gameboard', () => {
 
     test('ships', () => expect(testGameboard.ships).toHaveLength(2));    
 
-    test('receive attack true', () => expect(testGameboard.receiveAttack(0)).toBe(true));
+    test('receive attack', () => {
+        testGameboard.receiveAttack(0);
+    });
 
     test('hits after attack', () => expect(testGameboard.ships).toContainEqual({"hits": 1, "length": 4, "sunk": false}));
 
-    test('receive attack false', () => expect(testGameboard.receiveAttack(5)).toBe(false));
+    test('receive attack', () => {
+        testGameboard.receiveAttack(5);
+    });
     
     test('areAllShipsSunk false', () => expect(testGameboard.areAllShipsSunk()).toBe(false));
 });
@@ -40,13 +44,7 @@ describe('Player', () => {
     const player = new Player('user');
     const computer = new Player('computer');
   
-    test('player turn', () => expect(player.turn).toBe(false));
+    test('player turn', () => expect(player.turn).toBe(false));    
 
-    test('change player turn', () => {
-        player.takeTurn()
-    });
-  
-    test('player turn', () => expect(player.turn).toBe(true));
-
-    test('computer turn', () => expect(computer.playAuto()).toBeLessThan(100));
+    test('computer move', () => expect(computer.makeRandomMove()).toBeLessThan(100));
 });

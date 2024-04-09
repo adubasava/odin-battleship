@@ -1,8 +1,17 @@
 ﻿import game from "./game";
-import Gameboard from "./gameboard";
 
 const width = 10;
-const computerBoard = Gameboard.computer;
+
+function clearBoards() {
+    for (let i = 0; i < width * width; i++) {
+        let cell = document.querySelector(`#p-${i}`);
+        cell.remove();
+    }
+    for (let i = 0; i < width * width; i++) {
+        let cell = document.querySelector(`#c-${i}`);
+        cell.remove();
+    }
+}
 
 function createBoards() {
 
@@ -34,4 +43,4 @@ function updateCell(id, status) {
     cell.classList.add(status);
 }
 
-export { createBoards, updateCell }
+export { createBoards, updateCell, clearBoards }

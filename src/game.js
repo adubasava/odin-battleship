@@ -1,45 +1,70 @@
 ﻿import Player from "./player";
 import Gameboard from "./gameboard";
-import { updateCell } from "./manage-DOM";
+import { updateCell, createBoards, clearBoards } from "./manage-DOM";
 
 const info = document.querySelector('.instructions');
 const play = document.querySelector('#play');
+const restart = document.querySelector('#restart');
 const opponentBoard = document.querySelector('#gameboard2');
 
-play.addEventListener('click', gameLoop);
+restart.addEventListener('click', () => {
+    play.style.display = 'block';
+    playerGameboard = null;
+    computerGameboard = null;
+    player.moves = [];
+    player.turn = false;
+    computer.moves = [];    
+    computer.turn = false;
+    clearBoards();
+    createBoards();
+    opponentBoard.style.pointerEvents = 'auto';
+})
+
+play.addEventListener('click', () => {
+    gameLoop();
+}); 
 
 const player = new Player('user');
 const computer = new Player('computer');
 
-const playerGameboard = new Gameboard(player.user);
-const computerGameboard = new Gameboard(computer.user);
+let playerGameboard;
+let computerGameboard;
 
-player.takeTurn();
+player.turn = true;
 
-export default function game() {  
+// For AI to make smarter moves
+const cellsToExplore = [];
+
+// Start
+export default function game() {          
+
+    playerGameboard = new Gameboard(player.user);
+    computerGameboard = new Gameboard(computer.user);
 
     playerGameboard.create();
-    playerGameboard.placeShip(0, 5, 'horizontal');
-    playerGameboard.placeShip(30, 4, 'vertical');
-    playerGameboard.placeShip(49, 3, 'vertical');
-    playerGameboard.placeShip(82, 3, 'horizontal');
-    playerGameboard.placeShip(96, 2, 'horizontal');
+    playerGameboard.placeRandom(5);
+    playerGameboard.placeRandom(4);
+    playerGameboard.placeRandom(3);
+    playerGameboard.placeRandom(3);
+    playerGameboard.placeRandom(2);
 
     computerGameboard.create();
-    computerGameboard.placeShip(0, 5, 'horizontal');
-    computerGameboard.placeShip(30, 4, 'vertical');
-    computerGameboard.placeShip(49, 3, 'vertical');
-    computerGameboard.placeShip(82, 3, 'horizontal');
-    computerGameboard.placeShip(96, 2, 'horizontal');
+    computerGameboard.placeRandom(5);
+    computerGameboard.placeRandom(4);
+    computerGameboard.placeRandom(3);
+    computerGameboard.placeRandom(3);
+    computerGameboard.placeRandom(2);
 
-    info.innerHTML = 'Place your ships!';
+    info.innerHTML = 'Place your ships! Press ' + '<i>' + 'Play ' + '</i>' + 'when ready';
 
     return [playerGameboard.board, computerGameboard.board];
 }
 
 function gameLoop() {
 
-    if (isGameOver()) gameOver();
+    play.style.display = 'none';
+
+    if (isGameOver()) return gameOver();
 
     info.innerHTML = player.turn? 'Your turn' : 'AI turn';
 
@@ -48,28 +73,91 @@ function gameLoop() {
         do {
             AIStatus = AIMove();
         } while (AIStatus === 'hit');    
-    } else playerMove();    
+    } else playerMove();
+    
 }
 
 function AIMove() {
 
-    if (isGameOver()) gameOver();
+    if (isGameOver()) return gameOver();
     
     info.innerHTML = 'AI turn';
 
-    let moveId = computer.playAuto();
-    const status = playerGameboard.receiveAttack(moveId);
-    updateCell(`p-${moveId}`, status);
+    let status;
 
-    if (status === 'missed') {
+    const missed = () => {
         info.innerHTML = 'Your turn';
         computer.turn = false;
-        player.takeTurn();
-    } 
-    return status;
+        player.turn = true;
+    };
+    
+    const excludeDiagonal = function(cell) {
+        let diagCells = playerGameboard.getDiagNeibours(cell);
+        if (diagCells.length > 0) {
+            for (let diagCell of diagCells) {
+                computer.moves.push(diagCell);
+            }
+        }
+    };
+
+    const fillCellsToExplore = function(cell) {
+        let neighbours = playerGameboard.getNeighbours(cell);
+        for (let neighbour of neighbours) {
+            if (!cellsToExplore.includes(neighbour) && !computer.moves.includes(neighbour)) {
+                cellsToExplore.push(neighbour);
+            }                
+        }
+    };
+
+    const makeSmarterMove = function(move) {
+        computer.moves.push(move);
+        status = playerGameboard.receiveAttack(move);
+        updateCell(`p-${move}`, status);
+        return status;
+    };
+
+    if (cellsToExplore.length === 0) {
+        let moveId = computer.makeRandomMove();
+        status = playerGameboard.receiveAttack(moveId);
+        updateCell(`p-${moveId}`, status);
+
+        if (status === 'missed') {
+            missed();
+        } else {
+            if (isGameOver()) return gameOver();    
+
+            excludeDiagonal(moveId);
+            fillCellsToExplore(moveId);
+            
+            if (cellsToExplore.length > 0) {
+                let move = cellsToExplore.shift();
+                status = makeSmarterMove(move);
+                if (status === 'missed') missed();
+                return status;
+            } else return AIMove();   
+        }
+        return status;
+    } else {        
+        if (isGameOver()) return gameOver(); 
+
+        for (let i = 0; i < cellsToExplore.length; i++) {
+            let move = cellsToExplore.shift();            
+            status = makeSmarterMove(move);
+            if (status === 'hit') {
+                if (isGameOver()) gameOver(); 
+                excludeDiagonal(move);  
+                fillCellsToExplore(move);    
+            } else missed();
+            return status;          
+        }       
+    }
 }
 
-function playerMove() {       
+function playerMove() {      
+    
+    if (isGameOver()) return gameOver();
+
+    info.innerHTML = 'Your turn';
 
     opponentBoard.addEventListener('click', event => {
         let cellId = event.target.id;
@@ -77,11 +165,11 @@ function playerMove() {
         let status = computerGameboard.receiveAttack(cellId);
         updateCell(event.target.id, status);
 
-        if (isGameOver()) gameOver();
+        if (isGameOver()) return gameOver();
             
         if (status === 'missed') {
             player.turn = false;
-            computer.takeTurn();
+            computer.turn = true;
             gameLoop();
         }
     })    
@@ -92,8 +180,12 @@ function isGameOver() {
     return false;
 }
 
-function gameOver() {
-    info.innerHTML = 'Game over!';
+function gameOver() {    
     opponentBoard.style.pointerEvents = 'none';
+
+    if (playerGameboard.areAllShipsSunk()) {
+        info.innerHTML = 'Game over! AI won!';
+    } else info.innerHTML = 'Game over! You won!';
+    
     return;
 }
